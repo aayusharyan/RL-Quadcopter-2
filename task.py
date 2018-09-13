@@ -28,12 +28,17 @@ class Task():
 
     def get_reward(self):
         """Uses current pose of sim to return reward."""
-        loss  = (self.sim.pose[0]-self.target_pos[0])**2
-        loss += (self.sim.pose[1]-self.target_pos[1])**2
+        loss  = 0.1*(self.sim.pose[0]-self.target_pos[0])**2
+        loss += 0.1*(self.sim.pose[1]-self.target_pos[1])**2
         loss += (self.sim.pose[2]-self.target_pos[2])**2
-        loss += 0.1*self.sim.linear_accel[2]**2
+        loss += 2.0*self.sim.linear_accel[2]**2
         
         reward = np.maximum(1 - 0.2*(np.sqrt(1 + (loss/0.4) ** 2) - 1), 0)
+        
+        # Give more reward if flying near to target position
+        distance = np.sqrt((self.sim.pose[0]-self.target_pos[0])**2 +(self.sim.pose[1]-self.target_pos[1])**2 +(self.sim.pose[2]-self.target_pos[2])**2)
+        if distance < 10:
+            reward += 5
         
         # Reward for not ending
         reward += 0.2
